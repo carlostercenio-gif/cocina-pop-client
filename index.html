@@ -58,6 +58,7 @@
             <button class="cat-pill active" onclick="filtrarCat('MARKET', this)">MARKET</button>
             <button class="cat-pill" onclick="filtrarCat('FREEZER', this)">FREEZER</button>
             <button class="cat-pill" onclick="filtrarCat('HELADERA', this)">HELADERA</button>
+            <button class="cat-pill" onclick="filtrarCat('DEPOSITO', this)">DEPÓSITO</button>
         </div>
         <div id="catalogo-grid" class="cat-grid"></div>
     </main>
@@ -94,7 +95,7 @@
         <div id="modal-tips" class="modal-producto-tips" style="display:none;"></div>
         <div id="modal-videos" class="modal-producto-videos"></div>
         <div class="modal-producto-btns">
-            <button class="btn-whatsapp" onclick="pedirWhatsApp()">
+            <button class="btn-whatsapp" id="btn-whatsapp-modal" onclick="pedirWhatsApp()">
                 <i class="fa-brands fa-whatsapp"></i> PEDIR POR WHATSAPP
             </button>
             <button class="btn-favorito" id="btn-favorito" onclick="toggleFavorito()">
