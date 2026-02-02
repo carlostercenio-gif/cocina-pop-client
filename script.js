@@ -1,105 +1,44 @@
 // ═══════════════════════════════════════════════
-// 🥑 COCINA POP CLIENT - ENGINE
+// 🥑 COCINA POP CLIENT - ENGINE v2
 //    Scan for Flavor
 // ═══════════════════════════════════════════════
 
 (function() {
 
 // ═══════════════════════════════════════════════
-// 📦 CATÁLOGO DE PRODUCTOS
-// Editá esto con tus productos reales
+// ⚙️ CONFIGURACIÓN
 // ═══════════════════════════════════════════════
-const CATALOGO = {
-    "P-milanesas": {
-        nom: "Milanesas de Pollo",
-        emoji: "🍗",
-        precio: 8000,
-        cat: "FREEZER",
-        unidades: "x4 unidades",
-        tips: [
-            "Freír 3 min por lado a fuego medio",
-            "Horno a 180° por 20 minutos",
-            "Servir con ensalada fresca"
-        ],
-        videos: {
-            instagram: "",
-            youtube: ""
-        }
-    },
-    "P-empanadas": {
-        nom: "Empanadas de Carne",
-        emoji: "🥟",
-        precio: 6500,
-        cat: "FREEZER",
-        unidades: "x12 unidades",
-        tips: [
-            "Horno a 200° por 15-20 minutos",
-            "Hasta que estén doradas",
-            "Servir calientes con salsa"
-        ],
-        videos: {
-            instagram: "",
-            youtube: ""
-        }
-    },
-    "P-pizza": {
-        nom: "Pizza Muzzarella",
-        emoji: "🍕",
-        precio: 9000,
-        cat: "FREEZER",
-        unidades: "x1 pizza",
-        tips: [
-            "Horno a 200° por 12-15 minutos",
-            "Hasta que el queso se dore",
-            "Cortá en 8 porciones"
-        ],
-        videos: {
-            instagram: ""
-        }
-    },
-    "P-tarta": {
-        nom: "Tarta de Verdura",
-        emoji: "🥧",
-        precio: 7000,
-        cat: "FREEZER",
-        unidades: "x1 tarta",
-        tips: [
-            "Horno a 180° por 25 minutos",
-            "Dejá reposar 5 min antes de cortar",
-            "Se puede servir fría o caliente"
-        ],
-        videos: {}
-    },
-    "P-vinagreta": {
-        nom: "Vinagreta",
-        emoji: "🥗",
-        precio: 6500,
-        cat: "MARKET",
-        unidades: "x1 frasco",
-        tips: [
-            "Ideal para ensaladas",
-            "Mezclá bien antes de usar",
-            "Se conserva 30 días al abrir"
-        ],
-        videos: {}
-    },
-    "P-coca": {
-        nom: "Coca Cola",
-        emoji: "🥤",
-        precio: 666,
-        cat: "HELADERA",
-        unidades: "x1 unidad",
-        tips: [
-            "Servir bien fría",
-            "Ideal como acompañamiento"
-        ],
-        videos: {}
-    }
-};
-
-// ═══ CONFIGURACIÓN ═══
-// ← CAMBIÓ POR EL NÚMERO DE WHATSAPP REAL (sin espacios, con código de país)
+// ← CAMBIÓ POR TU NÚMERO DE WHATSAPP REAL (con código de país, sin espacios)
 const WA_NUMERO = "541234567890";
+
+// ═══════════════════════════════════════════════
+// 📦 CATÁLOGO - se carga desde productos.json
+// ═══════════════════════════════════════════════
+let CATALOGO = {};
+let catalogoLoaded = false;
+
+async function loadCatalogo() {
+    try {
+        const res = await fetch('/productos.json');
+        if (!res.ok) throw new Error('404');
+        CATALOGO = await res.json();
+    } catch(e) {
+        console.warn('⚠️ productos.json no encontrado, catálogo vacío');
+        CATALOGO = {};
+    }
+    catalogoLoaded = true;
+    renderAll();
+}
+
+// ═══════════════════════════════════════════════
+// 🧮 STOCK desde lotes FIFO
+// ═══════════════════════════════════════════════
+function calcularStock(p) {
+    if (p.lotes && p.lotes.length > 0) {
+        return p.lotes.reduce((sum, l) => sum + (l.cant || 0), 0);
+    }
+    return 0;
+}
 
 // ═══════════════════════════════════════════════
 // 💾 STATE & STORAGE
@@ -135,7 +74,7 @@ window.entrar = function() {
         splash.style.display = 'none';
         document.getElementById('app').classList.add('visible');
         loadData();
-        renderAll();
+        loadCatalogo();
     }, 600);
 };
 
@@ -143,15 +82,12 @@ window.entrar = function() {
 // 🔀 TABS / NAVEGACIÓN
 // ═══════════════════════════════════════════════
 window.goTab = function(tab, el) {
-    // Cambiar página
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
     document.getElementById('page-' + tab).classList.add('active');
 
-    // Cambiar nav
     document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
     el.classList.add('active');
 
-    // Render según página
     if (tab === 'home')       renderHome();
     if (tab === 'catalogo')   renderCatalogo();
     if (tab === 'favoritos')  renderFavoritos();
@@ -174,16 +110,16 @@ function renderFavoritosHome() {
         return;
     }
 
-    // Mostrar máximo 3
     el.innerHTML = favoritos.slice(0, 3).map(f => {
         const p = CATALOGO[f.id];
         if (!p) return '';
+        const stock = calcularStock(p);
         return `
             <div class="fav-item" onclick="abrirProducto('${f.id}')">
-                <div class="fav-item-emoji">${p.emoji}</div>
+                <div class="fav-item-emoji">${p.emoji || '📦'}</div>
                 <div class="fav-item-info">
                     <strong>${p.nom}</strong>
-                    <small>$${formatPrecio(p.precio)} • ${p.unidades}</small>
+                    <small>$${formatPrecio(p.pre)} • ${stock} disponible${stock !== 1 ? 's' : ''}</small>
                 </div>
                 <button class="fav-item-btn" onclick="event.stopPropagation(); pedirDirecto('${f.id}')">
                     <i class="fa-brands fa-whatsapp"></i> Pedir
@@ -227,23 +163,34 @@ window.filtrarCat = function(cat, btn) {
 
 function renderCatalogo() {
     const grid = document.getElementById('catalogo-grid');
-    const productos = Object.entries(CATALOGO).filter(([id, p]) => p.cat === catActual);
 
-    if (productos.length === 0) {
-        grid.innerHTML = '<p class="empty-msg" style="grid-column:1/-1;">Sin productos en esta categoría</p>';
+    if (!catalogoLoaded) {
+        grid.innerHTML = '<p class="empty-msg" style="grid-column:1/-1;">Cargando...</p>';
         return;
     }
 
-    grid.innerHTML = productos.map(([id, p]) => `
-        <div class="cat-card" onclick="abrirProducto('${id}')">
-            <div class="cat-card-img">${p.emoji}</div>
-            <div class="cat-card-info">
-                <strong>${p.nom}</strong>
-                <div class="cat-card-precio">$${formatPrecio(p.precio)}</div>
-                <div class="cat-card-unidades">${p.unidades}</div>
-            </div>
-        </div>
-    `).join('');
+    // Solo productos con stock > 0 en esa categoría
+    const productos = Object.entries(CATALOGO).filter(([id, p]) => {
+        return p.cat === catActual && calcularStock(p) > 0;
+    });
+
+    if (productos.length === 0) {
+        grid.innerHTML = '<p class="empty-msg" style="grid-column:1/-1;">Sin productos disponibles en esta categoría</p>';
+        return;
+    }
+
+    grid.innerHTML = productos.map(([id, p]) => {
+        const stock = calcularStock(p);
+        return `
+            <div class="cat-card" onclick="abrirProducto('${id}')">
+                <div class="cat-card-img">${p.emoji || '📦'}</div>
+                <div class="cat-card-info">
+                    <strong>${p.nom}</strong>
+                    <div class="cat-card-precio">$${formatPrecio(p.pre)}</div>
+                    <div class="cat-card-unidades">${stock} disponible${stock !== 1 ? 's' : ''}</div>
+                </div>
+            </div>`;
+    }).join('');
 }
 
 // ═══════════════════════════════════════════════
@@ -262,10 +209,10 @@ function renderFavoritos() {
         if (!p) return '';
         return `
             <div class="fav-page-item">
-                <div class="fav-page-item-emoji">${p.emoji}</div>
+                <div class="fav-page-item-emoji">${p.emoji || '📦'}</div>
                 <div class="fav-page-item-info">
                     <strong>${p.nom}</strong>
-                    <small>$${formatPrecio(p.precio)} • Último: ${formatDate(f.fecha)}</small>
+                    <small>$${formatPrecio(p.pre)} • Último: ${formatDate(f.fecha)}</small>
                 </div>
                 <div class="fav-page-item-actions">
                     <button class="btn-repedir" onclick="pedirDirecto('${f.id}')">
@@ -288,7 +235,6 @@ function renderHistorial() {
         return;
     }
 
-    // Agrupar por fecha
     const agrupado = {};
     historial.forEach((h, idx) => {
         if (!agrupado[h.fecha]) agrupado[h.fecha] = [];
@@ -322,11 +268,12 @@ window.abrirProducto = function(id) {
     if (!p) return;
     currentProductId = id;
 
-    // Datos
-    document.getElementById('modal-img').innerText = p.emoji;
+    const stock = calcularStock(p);
+
+    document.getElementById('modal-img').innerText = p.emoji || '📦';
     document.getElementById('modal-nom').innerText = p.nom;
-    document.getElementById('modal-precio').innerText = `$${formatPrecio(p.precio)}`;
-    document.getElementById('modal-cat').innerText = `${p.cat} • ${p.unidades}`;
+    document.getElementById('modal-precio').innerText = `$${formatPrecio(p.pre)}`;
+    document.getElementById('modal-cat').innerText = `${p.cat} • ${stock} disponible${stock !== 1 ? 's' : ''}`;
 
     // Tips
     const tipsEl = document.getElementById('modal-tips');
@@ -358,7 +305,18 @@ window.abrirProducto = function(id) {
         btnFav.classList.remove('active');
     }
 
-    // Abrir modal
+    // Botón WhatsApp: deshabilitar si no hay stock
+    const btnWA = document.getElementById('btn-whatsapp-modal');
+    if (stock === 0) {
+        btnWA.style.opacity = '0.4';
+        btnWA.style.pointerEvents = 'none';
+        btnWA.innerHTML = '<i class="fa-solid fa-ban"></i> SIN STOCK';
+    } else {
+        btnWA.style.opacity = '1';
+        btnWA.style.pointerEvents = 'auto';
+        btnWA.innerHTML = '<i class="fa-brands fa-whatsapp"></i> PEDIR POR WHATSAPP';
+    }
+
     document.getElementById('modal-producto').classList.add('active');
 };
 
@@ -376,12 +334,10 @@ window.toggleFavorito = function() {
     const btnFav = document.getElementById('btn-favorito');
 
     if (idx === -1) {
-        // Agregar
         favoritos.push({ id: currentProductId, fecha: getHoy() });
         btnFav.innerHTML = '<i class="fa-solid fa-star" style="color:var(--yellow)"></i> EN TUS FAVORITOS';
         btnFav.classList.add('active');
     } else {
-        // Borrar
         favoritos.splice(idx, 1);
         btnFav.innerHTML = '<i class="fa-solid fa-star"></i> AGREGAR A FAVORITOS';
         btnFav.classList.remove('active');
@@ -409,12 +365,12 @@ window.pedirWhatsApp = function() {
 window.pedirDirecto = function(id) {
     const p = CATALOGO[id];
     if (!p) return;
+    if (calcularStock(p) === 0) return;
 
-    // Registrar en historial
     agregarHistorial([id]);
 
     const msg = encodeURIComponent(
-        `Hola Cocina Pop! 🥑\n\nQuiero pedir:\n• ${p.nom} (${p.unidades}) - $${formatPrecio(p.precio)}\n\n¿Está disponible? Gracias!`
+        `Hola Cocina Pop! 🥑\n\nQuiero pedir:\n• ${p.nom} - $${formatPrecio(p.pre)}\n\n¿Está disponible? Gracias!`
     );
     window.open(`https://wa.me/${WA_NUMERO}?text=${msg}`, '_blank');
 };
@@ -425,12 +381,11 @@ window.repetirPedido = function(idx) {
 
     const lines = pedido.items.map(id => {
         const p = CATALOGO[id];
-        return p ? `• ${p.nom} (${p.unidades}) - $${formatPrecio(p.precio)}` : null;
+        return p ? `• ${p.nom} - $${formatPrecio(p.pre)}` : null;
     }).filter(Boolean);
 
     if (lines.length === 0) return;
 
-    // Nuevo historial
     agregarHistorial(pedido.items);
 
     const msg = encodeURIComponent(
@@ -467,11 +422,18 @@ window.startScanner = function() {
         { facingMode: "environment" },
         { fps: 10, qrbox: 220 },
         (texto) => {
-            // ✅ QR leído
             closeScanner();
             setTimeout(() => {
-                if (CATALOGO[texto]) {
-                    abrirProducto(texto);
+                // La app admin genera QR como JSON: {"id":"p_1234"}
+                // Intentamos parsear, si falla usamos el texto directo
+                let productId = texto;
+                try {
+                    const obj = JSON.parse(texto);
+                    if (obj.id) productId = obj.id;
+                } catch(e) {}
+
+                if (CATALOGO[productId]) {
+                    abrirProducto(productId);
                 } else {
                     document.getElementById('modal-no-encontrado').classList.add('active');
                 }
@@ -513,7 +475,7 @@ function renderAll() {
 }
 
 // ═══════════════════════════════════════════════
-console.log('🥑 Cocina Pop Client - Iniciado');
+console.log('🥑 Cocina Pop Client v2 - Iniciado');
 // ═══════════════════════════════════════════════
 
 })();
