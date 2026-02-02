@@ -4,18 +4,137 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cocina Pop - Scan for Flavor</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="/style.css">
     <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#FFEF00">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
 </head>
 <body>
-    <div style="text-align: center; padding: 100px 20px;">
-        <h1 style="font-size: 48px; margin: 0;">🥑</h1>
-        <h1 style="font-size: 32px; margin: 10px 0;">COCINA POP</h1>
-        <p style="font-size: 18px; opacity: 0.7;">Scan for Flavor</p>
-        <p style="margin-top: 40px; opacity: 0.5;">Coming Soon...</p>
+
+<!-- ═══ SPLASH ═══ -->
+<div id="splash" onclick="entrar()">
+    <div class="splash-ring"></div>
+    <div class="splash-content">
+        <h1 class="splash-title">COCINA<span>POP</span></h1>
+        <p class="splash-sub">SCAN FOR FLAVOR</p>
+        <p class="splash-tap">TAP TO ENTER</p>
     </div>
-    
-    <script src="/script.js"></script>
+</div>
+
+<!-- ═══ APP ═══ -->
+<div id="app">
+
+    <!-- HEADER -->
+    <header class="header">
+        <div class="logo">COCINA <span>POP</span></div>
+        <i class="fa-solid fa-bolt header-icon"></i>
+    </header>
+
+    <!-- ─── HOME ─── -->
+    <main id="page-home" class="page active">
+        <div class="scan-btn" onclick="startScanner()">
+            <div class="scan-btn-inner">
+                <i class="fa-solid fa-camera"></i>
+                <span>ESCANEAR PRODUCTO</span>
+            </div>
+        </div>
+
+        <div class="section-title">⭐ TUS FAVORITOS</div>
+        <div id="favoritos-home">
+            <p class="empty-msg">Sin favoritos aún</p>
+        </div>
+
+        <div class="section-title">📦 ÚLTIMO PEDIDO</div>
+        <div id="ultimo-pedido">
+            <p class="empty-msg">Sin pedidos aún</p>
+        </div>
+    </main>
+
+    <!-- ─── CATÁLOGO ─── -->
+    <main id="page-catalogo" class="page">
+        <div class="cat-tabs">
+            <button class="cat-pill active" onclick="filtrarCat('MARKET', this)">MARKET</button>
+            <button class="cat-pill" onclick="filtrarCat('FREEZER', this)">FREEZER</button>
+            <button class="cat-pill" onclick="filtrarCat('HELADERA', this)">HELADERA</button>
+        </div>
+        <div id="catalogo-grid" class="cat-grid"></div>
+    </main>
+
+    <!-- ─── FAVORITOS ─── -->
+    <main id="page-favoritos" class="page">
+        <div class="section-title">⭐ MIS FAVORITOS</div>
+        <div id="lista-favoritos"></div>
+    </main>
+
+    <!-- ─── HISTORIAL ─── -->
+    <main id="page-historial" class="page">
+        <div class="section-title">📜 MIS COMPRAS</div>
+        <div id="lista-historial"></div>
+    </main>
+
+    <!-- BOTTOM NAV -->
+    <nav class="bottom-nav">
+        <div class="nav-item active" onclick="goTab('home', this)"><i class="fa-solid fa-house"></i><span>Inicio</span></div>
+        <div class="nav-item" onclick="goTab('catalogo', this)"><i class="fa-solid fa-grid-vertical"></i><span>Catálogo</span></div>
+        <div class="nav-item" onclick="goTab('favoritos', this)"><i class="fa-solid fa-star"></i><span>Favoritos</span></div>
+        <div class="nav-item" onclick="goTab('historial', this)"><i class="fa-solid fa-clock-rotate-left"></i><span>Historial</span></div>
+    </nav>
+</div>
+
+<!-- ═══ MODAL PRODUCTO ═══ -->
+<div id="modal-producto" class="modal-overlay" onclick="closeModal('modal-producto')">
+    <div class="modal-card" onclick="event.stopPropagation()">
+        <button class="modal-close" onclick="closeModal('modal-producto')"><i class="fa-solid fa-xmark"></i></button>
+        <div class="modal-producto-img" id="modal-img">🍗</div>
+        <h2 class="modal-producto-nom" id="modal-nom">PRODUCTO</h2>
+        <p class="modal-producto-precio" id="modal-precio">$0</p>
+        <p class="modal-producto-cat" id="modal-cat">FREEZER • x4</p>
+        <div id="modal-tips" class="modal-producto-tips" style="display:none;"></div>
+        <div id="modal-videos" class="modal-producto-videos"></div>
+        <div class="modal-producto-btns">
+            <button class="btn-whatsapp" onclick="pedirWhatsApp()">
+                <i class="fa-brands fa-whatsapp"></i> PEDIR POR WHATSAPP
+            </button>
+            <button class="btn-favorito" id="btn-favorito" onclick="toggleFavorito()">
+                <i class="fa-solid fa-star"></i> AGREGAR A FAVORITOS
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- ═══ MODAL SCANNER ═══ -->
+<div id="modal-scanner" class="modal-overlay modal-scanner-overlay">
+    <div class="modal-card modal-scanner-card">
+        <button class="modal-close modal-close-white" onclick="closeScanner()"><i class="fa-solid fa-xmark"></i></button>
+        <h3 class="scanner-title">ESCANEAR QR</h3>
+        <div id="reader"></div>
+        <p class="scanner-hint">Apuntá la cámara al código QR</p>
+    </div>
+</div>
+
+<!-- ═══ MODAL NO ENCONTRADO ═══ -->
+<div id="modal-no-encontrado" class="modal-overlay" onclick="closeModal('modal-no-encontrado')">
+    <div class="modal-card modal-centrado" onclick="event.stopPropagation()">
+        <button class="modal-close" onclick="closeModal('modal-no-encontrado')"><i class="fa-solid fa-xmark"></i></button>
+        <div class="modal-no-emoji">❓</div>
+        <h2 class="modal-no-titulo">QR NO ENCONTRADO</h2>
+        <p class="modal-no-texto">Este producto no está en el catálogo de Cocina Pop</p>
+        <button class="btn-whatsapp" onclick="closeModal('modal-no-encontrado'); consultarWA();">
+            <i class="fa-brands fa-whatsapp"></i> CONSULTAMOS A COCINA POP
+        </button>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
+<script src="/script.js"></script>
+<script>
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/service-worker.js')
+            .then(() => console.log('SW registrado'))
+            .catch(err => console.log('Error SW:', err));
+    }
+</script>
 </body>
 </html>
