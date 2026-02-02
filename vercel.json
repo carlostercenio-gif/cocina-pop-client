@@ -1,0 +1,27 @@
+{
+  "version": 2,
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
+    }
+  ]
+}
+```
+
+3. **Archivo** → **Guardar como**
+4. **Tipo:** "Todos los archivos (*.*)"
+5. **Nombre:** `vercel.json`
+6. **Guardar** (misma carpeta)
+
+---
+
+## ✅ AHORA TENÉS LOS 6 ARCHIVOS:
+```
+📁 Tu carpeta
+├── index.html
+├── style.css
+├── script.js
+├── manifest.json
+├── service-worker.js
+└── vercel.json

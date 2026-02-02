@@ -1,0 +1,10 @@
+{
+  "name": "Cocina Pop Client",
+  "short_name": "Cocina Pop",
+  "description": "Scan for Flavor - App para clientes",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#FFEF00",
+  "orientation": "portrait"
+}

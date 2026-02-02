@@ -1,0 +1,1 @@
+console.log('Cocina Pop Client - Iniciado');
