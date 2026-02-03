@@ -41,46 +41,41 @@
             </div>
         </div>
 
-        <div class="section-title">⭐ TUS FAVORITOS</div>
+        <div class="section-title">📦 ÚLTIMOS PRODUCTOS</div>
         <div id="favoritos-home">
-            <p class="empty-msg">Sin favoritos aún</p>
+            <p class="empty-msg">Escaneá tu primer producto</p>
         </div>
 
-        <div class="section-title">📦 ÚLTIMO PEDIDO</div>
+        <div class="section-title">📊 RESUMEN</div>
         <div id="ultimo-pedido">
-            <p class="empty-msg">Sin pedidos aún</p>
+            <p class="empty-msg">Tu despensa está vacía</p>
         </div>
     </main>
 
-    <!-- ─── CATÁLOGO ─── -->
+    <!-- ─── MARKET ─── -->
     <main id="page-catalogo" class="page">
-        <div class="cat-tabs">
-            <button class="cat-pill active" onclick="filtrarCat('MARKET', this)">MARKET</button>
-            <button class="cat-pill" onclick="filtrarCat('FREEZER', this)">FREEZER</button>
-            <button class="cat-pill" onclick="filtrarCat('HELADERA', this)">HELADERA</button>
-            <button class="cat-pill" onclick="filtrarCat('DEPOSITO', this)">DEPÓSITO</button>
-        </div>
+        <div class="section-title">🛒 MI MARKET</div>
         <div id="catalogo-grid" class="cat-grid"></div>
     </main>
 
-    <!-- ─── FAVORITOS ─── -->
+    <!-- ─── FREEZER ─── -->
     <main id="page-favoritos" class="page">
-        <div class="section-title">⭐ MIS FAVORITOS</div>
+        <div class="section-title">❄️ MI FREEZER</div>
         <div id="lista-favoritos"></div>
     </main>
 
-    <!-- ─── HISTORIAL ─── -->
+    <!-- ─── HELADERA ─── -->
     <main id="page-historial" class="page">
-        <div class="section-title">📜 MIS COMPRAS</div>
+        <div class="section-title">🧊 MI HELADERA</div>
         <div id="lista-historial"></div>
     </main>
 
     <!-- BOTTOM NAV -->
     <nav class="bottom-nav">
         <div class="nav-item active" onclick="goTab('home', this)"><i class="fa-solid fa-house"></i><span>Inicio</span></div>
-        <div class="nav-item" onclick="goTab('catalogo', this)"><i class="fa-solid fa-grid-vertical"></i><span>Catálogo</span></div>
-        <div class="nav-item" onclick="goTab('favoritos', this)"><i class="fa-solid fa-star"></i><span>Favoritos</span></div>
-        <div class="nav-item" onclick="goTab('historial', this)"><i class="fa-solid fa-clock-rotate-left"></i><span>Historial</span></div>
+        <div class="nav-item" onclick="goTab('catalogo', this)"><i class="fa-solid fa-shopping-bag"></i><span>Market</span></div>
+        <div class="nav-item" onclick="goTab('favoritos', this)"><i class="fa-solid fa-snowflake"></i><span>Freezer</span></div>
+        <div class="nav-item" onclick="goTab('historial', this)"><i class="fa-solid fa-ice-cream"></i><span>Heladera</span></div>
     </nav>
 </div>
 
@@ -99,7 +94,7 @@
                 <i class="fa-brands fa-whatsapp"></i> PEDIR POR WHATSAPP
             </button>
             <button class="btn-favorito" id="btn-favorito" onclick="toggleFavorito()">
-                <i class="fa-solid fa-star"></i> AGREGAR A FAVORITOS
+                <i class="fa-solid fa-trash"></i> ELIMINAR DE MI DESPENSA
             </button>
         </div>
     </div>
@@ -123,7 +118,7 @@
         <h2 class="modal-no-titulo">QR NO ENCONTRADO</h2>
         <p class="modal-no-texto">Este producto no está en el catálogo de Cocina Pop</p>
         <button class="btn-whatsapp" onclick="closeModal('modal-no-encontrado'); consultarWA();">
-            <i class="fa-brands fa-whatsapp"></i> CONSULTAMOS A COCINA POP
+            <i class="fa-brands fa-whatsapp"></i> CONSULTAR A COCINA POP
         </button>
     </div>
 </div>
