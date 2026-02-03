@@ -9,7 +9,7 @@
 // ⚙️ CONFIGURACIÓN
 // ═══════════════════════════════════════════════
 // ← CAMBIÓ POR TU NÚMERO DE WHATSAPP REAL (con código de país, sin espacios)
-const WA_NUMERO = "541234567890";
+const WA_NUMERO = "5491156444379";
 
 // ═══════════════════════════════════════════════
 // 📦 CATÁLOGO - se carga desde productos.json
