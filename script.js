@@ -11,6 +11,7 @@
 const WA_NUMERO = "5491156444379";
 
 // ═══════════════════════════════════════════════
+// ═══════════════════════════════════════════════
 // 💾 MI DESPENSA (productos escaneados por categoría)
 // ═══════════════════════════════════════════════
 let miDespensa = {
@@ -19,10 +20,11 @@ let miDespensa = {
     HELADERA: []
 };
 
+let catalogoProductos = {}; // Productos disponibles (desde productos.json)
 let currentProducto = null;
 let scanner = null;
 
-function loadData() {
+async function loadData() {
     try {
         const saved = localStorage.getItem('cp_client_despensa');
         if (saved) {
@@ -30,6 +32,23 @@ function loadData() {
         }
     } catch(e) {
         console.error('Error cargando despensa:', e);
+    }
+    
+    // Cargar catálogo de productos
+    await cargarCatalogo();
+}
+
+async function cargarCatalogo() {
+    try {
+        const response = await fetch('/productos.json');
+        if (response.ok) {
+            catalogoProductos = await response.json();
+            console.log('✅ Catálogo cargado:', Object.keys(catalogoProductos).length, 'productos');
+        } else {
+            console.warn('⚠️ No se encontró productos.json');
+        }
+    } catch(e) {
+        console.error('❌ Error cargando catálogo:', e);
     }
 }
 
