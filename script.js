@@ -323,11 +323,11 @@ window.consultarWA = function() {
 // ═══════════════════════════════════════════════
 window.startScanner = function() {
     document.getElementById('modal-scanner').classList.add('active');
-
+    
     if (!scanner) {
         scanner = new Html5Qrcode("reader");
     }
-
+    
     scanner.start(
         { facingMode: "environment" },
         { fps: 10, qrbox: 220 },
@@ -335,11 +335,14 @@ window.startScanner = function() {
             closeScanner();
             setTimeout(() => {
                 try {
-                    const producto = JSON.parse(texto);
+                    const qrData = JSON.parse(texto);
                     
-                    if (producto.id && producto.nom && producto.cat) {
-                        agregarProductoEscaneado(producto);
+                    // QR simple trae solo: {"id":"p_123"}
+                    if (qrData.id && catalogoProductos[qrData.id]) {
+                        const producto = catalogoProductos[qrData.id];
+                        agregarProductoEscaneado(producto, qrData.id);
                     } else {
+                        console.error('Producto no encontrado en catálogo:', qrData.id);
                         document.getElementById('modal-no-encontrado').classList.add('active');
                     }
                 } catch(e) {
@@ -362,28 +365,46 @@ window.closeScanner = function() {
 };
 
 // ═══════════════════════════════════════════════
+// ═══════════════════════════════════════════════
 // ✅ AGREGAR PRODUCTO ESCANEADO
 // ═══════════════════════════════════════════════
-function agregarProductoEscaneado(producto) {
+function agregarProductoEscaneado(producto, id) {
     // Verificar categoría válida
     if (!['MARKET', 'FREEZER', 'HELADERA'].includes(producto.cat)) {
         alert('Este producto no es para clientes (categoría: ' + producto.cat + ')');
         return;
     }
-
+    
     // Verificar si ya existe en esa categoría
-    const yaExiste = miDespensa[producto.cat].some(p => p.id === producto.id);
+    const yaExiste = miDespensa[producto.cat].some(p => p.id === id);
     
     if (yaExiste) {
         alert(`Ya tenés "${producto.nom}" en tu ${producto.cat}`);
         return;
     }
-
-    // Agregar fecha de escaneo
-    producto.fechaEscaneo = new Date().toISOString();
+    
+    // Obtener vencimiento del lote más viejo (FIFO)
+    let vencimiento = null;
+    if (producto.lotes && producto.lotes.length > 0) {
+        const lotesSorted = [...producto.lotes].sort((a, b) => new Date(a.ven) - new Date(b.ven));
+        vencimiento = lotesSorted[0].ven;
+    }
+    
+    // Crear objeto para Mi Despensa
+    const productoParaDespensa = {
+        id: id,
+        nom: producto.nom,
+        precio: producto.pre,
+        emoji: producto.emoji || '📦',
+        cat: producto.cat,
+        vencimiento: vencimiento,
+        videos: producto.videos || {},
+        tips: producto.tips || [],
+        fechaEscaneo: new Date().toISOString()
+    };
     
     // Agregar a la categoría correspondiente
-    miDespensa[producto.cat].push(producto);
+    miDespensa[producto.cat].push(productoParaDespensa);
     saveData();
     
     // Mostrar confirmación
