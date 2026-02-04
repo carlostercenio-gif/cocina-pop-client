@@ -1,3 +1,4 @@
+
 {
   "p_1770244733499": {
     "nom": "berenjenas",
@@ -11,7 +12,26 @@
         "fecha": "2026-02-04T22:39:12.253Z"
       }
     ],
-    "tips": [],
+    "tips": [
+      "ojo con la berenjena"
+    ],
+    "videos": {}
+  },
+  "p_1770245301200": {
+    "nom": "mila de pollo",
+    "emoji": "mila",
+    "pre": 899879,
+    "cat": "FREEZER",
+    "lotes": [
+      {
+        "cant": 187,
+        "ven": "2026-02-28",
+        "fecha": "2026-02-04T22:48:35.536Z"
+      }
+    ],
+    "tips": [
+      "freirla bien"
+    ],
     "videos": {}
   }
 }
