@@ -1,11 +1,15 @@
 {
-  "p_1770157892087": {
+  "p_1770240326815": {
     "nom": "zanahoria",
     "emoji": "zana",
-    "pre": 86789,
+    "pre": 7000,
     "cat": "MARKET",
     "lotes": [],
-    "tips": [],
-    "videos": {}
+    "tips": [
+      "pelar antes de metertela en el orto"
+    ],
+    "videos": {
+      "instagram": "no hay"
+    }
   }
 }
