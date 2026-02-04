@@ -38,7 +38,13 @@
     "emoji": "cae",
     "pre": 89000,
     "cat": "HELADERA",
-    "lotes": [],
+    "lotes": [
+      {
+        "cant": 1899,
+        "ven": "2026-03-28",
+        "fecha": "2026-02-04T22:58:57.400Z"
+      }
+    ],
     "tips": [
       "ponele agua"
     ],
