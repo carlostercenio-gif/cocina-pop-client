@@ -1,4 +1,3 @@
-
 {
   "p_1770244733499": {
     "nom": "berenjenas",
@@ -33,5 +32,19 @@
       "freirla bien"
     ],
     "videos": {}
+  },
+  "p_1770245824209": {
+    "nom": "aderezo caesar",
+    "emoji": "cae",
+    "pre": 89000,
+    "cat": "HELADERA",
+    "lotes": [],
+    "tips": [
+      "ponele agua"
+    ],
+    "videos": {
+      "instagram": "no hay video",
+      "youtube": "mas tarde"
+    }
   }
 }
