@@ -1,15 +1,17 @@
 {
-  "p_1770240326815": {
-    "nom": "zanahoria",
-    "emoji": "zana",
-    "pre": 7000,
+  "p_1770244733499": {
+    "nom": "berenjenas",
+    "emoji": "be",
+    "pre": 7567,
     "cat": "MARKET",
-    "lotes": [],
-    "tips": [
-      "pelar antes de metertela en el orto"
+    "lotes": [
+      {
+        "cant": 1,
+        "ven": "2026-02-28",
+        "fecha": "2026-02-04T22:39:12.253Z"
+      }
     ],
-    "videos": {
-      "instagram": "no hay"
-    }
+    "tips": [],
+    "videos": {}
   }
 }
