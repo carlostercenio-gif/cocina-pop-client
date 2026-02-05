@@ -125,31 +125,28 @@ function renderHome() {
         document.getElementById('ultimo-pedido').innerHTML = '<p class="empty-msg">Tu despensa está vacía</p>';
         return;
     }
-
     // Mostrar últimos 5 productos escaneados (de todas las categorías)
     const todos = [
         ...miDespensa.MARKET.map(p => ({...p, cat: 'MARKET'})),
         ...miDespensa.FREEZER.map(p => ({...p, cat: 'FREEZER'})),
         ...miDespensa.HELADERA.map(p => ({...p, cat: 'HELADERA'}))
     ].sort((a, b) => new Date(b.fechaEscaneo) - new Date(a.fechaEscaneo)).slice(0, 5);
-
     el.innerHTML = todos.map(p => {
         const diasVenc = calcularDiasVencimiento(p.vencimiento);
         const alertaVenc = diasVenc <= 3 ? '⚠️' : '';
         
         return `
-        <div class="fav-item" onclick="verDetalleProducto('${p.id}', '${p.cat}')">
+        <div class="fav-item" onclick="verDetalleProducto('${p.uniqueId}', '${p.cat}')">
             <div class="fav-item-emoji">${p.emoji || '📦'}</div>
             <div class="fav-item-info">
                 <strong>${p.nom}</strong>
                 <small>${p.cat} • Vence: ${formatDate(p.vencimiento)} ${alertaVenc}</small>
             </div>
-            <button class="fav-item-btn" onclick="event.stopPropagation(); pedirProducto('${p.id}', '${p.cat}')">
+            <button class="fav-item-btn" onclick="event.stopPropagation(); pedirProducto('${p.uniqueId}', '${p.cat}')">
                 <i class="fa-brands fa-whatsapp"></i> Pedir
             </button>
         </div>`;
     }).join('');
-
     // Resumen
     document.getElementById('ultimo-pedido').innerHTML = `
         <div class="pedido-card">
@@ -168,19 +165,17 @@ function renderHome() {
 function renderMarket() {
     const grid = document.getElementById('catalogo-grid');
     const productos = miDespensa.MARKET || [];
-
     if (productos.length === 0) {
         grid.innerHTML = '<p class="empty-msg" style="grid-column:1/-1;">Sin productos en MARKET<br>Escaneá uno para agregarlo</p>';
         return;
     }
-
     grid.innerHTML = productos.map(p => {
         const diasVenc = calcularDiasVencimiento(p.vencimiento);
         const alertaVenc = diasVenc <= 3 ? '⚠️ ' : '';
         const textoVenc = diasVenc < 0 ? 'VENCIDO' : diasVenc === 0 ? 'Vence HOY' : `${diasVenc} días`;
         
         return `
-            <div class="cat-card" onclick="verDetalleProducto('${p.id}', 'MARKET')">
+            <div class="cat-card" onclick="verDetalleProducto('${p.uniqueId}', 'MARKET')">
                 <div class="cat-card-img">${p.emoji || '📦'}</div>
                 <div class="cat-card-info">
                     <strong>${p.nom}</strong>
@@ -197,12 +192,10 @@ function renderMarket() {
 function renderFreezer() {
     const el = document.getElementById('lista-favoritos');
     const productos = miDespensa.FREEZER || [];
-
     if (productos.length === 0) {
         el.innerHTML = '<p class="empty-msg">Sin productos en FREEZER<br>Escaneá uno para agregarlo</p>';
         return;
     }
-
     el.innerHTML = productos.map(p => {
         const diasVenc = calcularDiasVencimiento(p.vencimiento);
         const alertaVenc = diasVenc <= 3 ? '⚠️ ' : '';
@@ -216,10 +209,10 @@ function renderFreezer() {
                     <small>$${formatPrecio(p.precio)} • ${alertaVenc}${textoVenc}</small>
                 </div>
                 <div class="fav-page-item-actions">
-                    <button class="btn-repedir" onclick="verDetalleProducto('${p.id}', 'FREEZER')">
+                    <button class="btn-repedir" onclick="verDetalleProducto('${p.uniqueId}', 'FREEZER')">
                         <i class="fa-solid fa-eye"></i> Ver
                     </button>
-                    <button class="btn-repedir" onclick="pedirProducto('${p.id}', 'FREEZER')" style="background: var(--green);">
+                    <button class="btn-repedir" onclick="pedirProducto('${p.uniqueId}', 'FREEZER')" style="background: var(--green);">
                         <i class="fa-brands fa-whatsapp"></i> Pedir
                     </button>
                 </div>
@@ -233,12 +226,10 @@ function renderFreezer() {
 function renderHeladera() {
     const el = document.getElementById('lista-historial');
     const productos = miDespensa.HELADERA || [];
-
     if (productos.length === 0) {
         el.innerHTML = '<p class="empty-msg">Sin productos en HELADERA<br>Escaneá uno para agregarlo</p>';
         return;
     }
-
     el.innerHTML = productos.map(p => {
         const diasVenc = calcularDiasVencimiento(p.vencimiento);
         const alertaVenc = diasVenc <= 3 ? '⚠️ ' : '';
@@ -252,35 +243,31 @@ function renderHeladera() {
                     <small>$${formatPrecio(p.precio)} • ${alertaVenc}${textoVenc}</small>
                 </div>
                 <div style="display:flex; gap:6px;">
-                    <button class="historial-repedir" onclick="verDetalleProducto('${p.id}', 'HELADERA')">
+                    <button class="historial-repedir" onclick="verDetalleProducto('${p.uniqueId}', 'HELADERA')">
                         <i class="fa-solid fa-eye"></i> Ver
                     </button>
-                    <button class="historial-repedir" onclick="pedirProducto('${p.id}', 'HELADERA')" style="border-color: var(--green); color: var(--green);">
+                    <button class="historial-repedir" onclick="pedirProducto('${p.uniqueId}', 'HELADERA')" style="border-color: var(--green); color: var(--green);">
                         <i class="fa-brands fa-whatsapp"></i> Pedir
                     </button>
                 </div>
             </div>`;
     }).join('');
 }
-
 // ═══════════════════════════════════════════════
 // 📱 VER DETALLE DE PRODUCTO
 // ═══════════════════════════════════════════════
 window.verDetalleProducto = function(id, cat) {
-    const p = miDespensa[cat].find(prod => prod.id === id);
+    const p = miDespensa[cat].find(prod => prod.uniqueId === id);
     if (!p) return;
     
     currentProducto = { ...p, cat };
-
     const diasVenc = calcularDiasVencimiento(p.vencimiento);
     const alertaVenc = diasVenc <= 3 ? '⚠️ ' : '';
     const textoVenc = diasVenc < 0 ? 'VENCIDO' : diasVenc === 0 ? 'Vence HOY' : `Vence en ${diasVenc} días`;
-
     document.getElementById('modal-img').innerText = p.emoji || '📦';
     document.getElementById('modal-nom').innerText = p.nom;
     document.getElementById('modal-precio').innerText = `$${formatPrecio(p.precio)}`;
     document.getElementById('modal-cat').innerText = `${cat} • ${alertaVenc}${textoVenc}`;
-
     // Tips
     const tipsEl = document.getElementById('modal-tips');
     if (p.tips && p.tips.length > 0) {
@@ -289,7 +276,6 @@ window.verDetalleProducto = function(id, cat) {
     } else {
         tipsEl.style.display = 'none';
     }
-
     // Videos
     const videosEl = document.getElementById('modal-videos');
     let html = '';
@@ -299,14 +285,11 @@ window.verDetalleProducto = function(id, cat) {
         if (p.videos.tiktok) html += `<a href="${p.videos.tiktok}" target="_blank" class="video-btn tiktok"><i class="fa-brands fa-tiktok"></i> Ver en TikTok</a>`;
     }
     videosEl.innerHTML = html;
-
     document.getElementById('modal-producto').classList.add('active');
 };
-
 window.closeModal = function(id) {
     document.getElementById(id).classList.remove('active');
 };
-
 // ═══════════════════════════════════════════════
 // 🗑️ ELIMINAR PRODUCTO
 // ═══════════════════════════════════════════════
@@ -314,36 +297,50 @@ window.toggleFavorito = function() {
     if (!currentProducto) return;
     
     if (confirm(`¿Eliminar ${currentProducto.nom} de tu despensa?`)) {
-        miDespensa[currentProducto.cat] = miDespensa[currentProducto.cat].filter(p => p.id !== currentProducto.id);
+        miDespensa[currentProducto.cat] = miDespensa[currentProducto.cat].filter(p => p.uniqueId !== currentProducto.uniqueId);
         saveData();
         closeModal('modal-producto');
         renderAll();
     }
 };
+```
+
+---
+
+## 🔑 CAMBIOS:
+
+- Línea 4: Arreglé sintaxis del `confirm()` (tenía backticks raros)
+- Línea 5: `p.id !== currentProducto.id` → `p.uniqueId !== currentProducto.uniqueId`
+
+**Pegá esto encima!** ✅
+
+---
+
+## 🎉 LISTO! YA ESTÁN TODAS LAS FUNCIONES ACTUALIZADAS
+
+Ahora hacé **commit y push** del cliente:
+```
+Mensaje: "✨ Sistema FIFO - Permite duplicados ordenados por vencimiento"
 
 // ═══════════════════════════════════════════════
 // 💬 WHATSAPP
 // ═══════════════════════════════════════════════
 window.pedirWhatsApp = function() {
     if (!currentProducto) return;
-    pedirProducto(currentProducto.id, currentProducto.cat);
+    pedirProducto(currentProducto.uniqueId, currentProducto.cat);
 };
-
 window.pedirProducto = function(id, cat) {
-    const p = miDespensa[cat].find(prod => prod.id === id);
+    const p = miDespensa[cat].find(prod => prod.uniqueId === id);
     if (!p) return;
-
     const msg = encodeURIComponent(
         `Hola Cocina Pop! 🥑\n\nQuiero pedir:\n• ${p.nom} - $${formatPrecio(p.precio)}\n\n¿Está disponible? Gracias!`
     );
     window.open(`https://wa.me/${WA_NUMERO}?text=${msg}`, '_blank');
 };
-
 window.consultarWA = function() {
     const msg = encodeURIComponent(`Hola Cocina Pop! 🥑\nTengo una pregunta sobre un producto. ¿Puede ayudarme?`);
     window.open(`https://wa.me/${WA_NUMERO}?text=${msg}`, '_blank');
 };
-
 // ═══════════════════════════════════════════════
 // 📷 SCANNER QR
 // ═══════════════════════════════════════════════
