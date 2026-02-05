@@ -49,14 +49,13 @@ async function cargarCatalogo() {
                 'Authorization': 'Bearer sb_publishable_hfCaIjbpKHiFUuZjl32BTg_hPe3s0Jl'
             }
         });
-
         if (response.ok) {
             const productosArray = await response.json();
             
             // Convertir array a objeto {id: producto}
             catalogoProductos = {};
             productosArray.forEach(item => {
-                catalogoProductos[item.id] = JSON.parse(item.data);
+                catalogoProductos[item.id] = item.data;
             });
             
             console.log('✅ Catálogo cargado desde Supabase:', Object.keys(catalogoProductos).length, 'productos');
@@ -67,7 +66,6 @@ async function cargarCatalogo() {
     } catch (error) {
         console.error('❌ Error cargando desde Supabase:', error);
     }
-
     // FALLBACK: Si falla Supabase, intentar cargar el productos.json local
     try {
         const response = await fetch('/productos.json');
@@ -81,11 +79,9 @@ async function cargarCatalogo() {
         console.error('❌ Error cargando catálogo:', e);
     }
 }
-
 function saveData() {
     localStorage.setItem('cp_client_despensa', JSON.stringify(miDespensa));
 }
-
 // ═══════════════════════════════════════════════
 // 🎬 SPLASH
 // ═══════════════════════════════════════════════
@@ -508,7 +504,7 @@ window.actualizarCatalogo = async function() {
         // Convertir array a objeto
         const nuevosCatalogo = {};
         productosArray.forEach(item => {
-            nuevosCatalogo[item.id] = JSON.parse(item.data);
+            nuevosCatalogo[item.id] = item.data;
         });
         
         // Actualizar catálogo en memoria
