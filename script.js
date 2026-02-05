@@ -40,10 +40,40 @@ async function loadData() {
 
 async function cargarCatalogo() {
     try {
+        // Intentar cargar desde Supabase
+        const response = await fetch('https://hmuufyyxbfksslbstjra.supabase.co/rest/v1/productos?select=*', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'apikey': 'sb_publishable_hfCaIjbpKHiFUuZjl32BTg_hPe3s0Jl',
+                'Authorization': 'Bearer sb_publishable_hfCaIjbpKHiFUuZjl32BTg_hPe3s0Jl'
+            }
+        });
+
+        if (response.ok) {
+            const productosArray = await response.json();
+            
+            // Convertir array a objeto {id: producto}
+            catalogoProductos = {};
+            productosArray.forEach(item => {
+                catalogoProductos[item.id] = JSON.parse(item.data);
+            });
+            
+            console.log('✅ Catálogo cargado desde Supabase:', Object.keys(catalogoProductos).length, 'productos');
+            return;
+        } else {
+            console.warn('⚠️ Error al cargar desde Supabase, intentando fallback...');
+        }
+    } catch (error) {
+        console.error('❌ Error cargando desde Supabase:', error);
+    }
+
+    // FALLBACK: Si falla Supabase, intentar cargar el productos.json local
+    try {
         const response = await fetch('/productos.json');
         if (response.ok) {
             catalogoProductos = await response.json();
-            console.log('✅ Catálogo cargado:', Object.keys(catalogoProductos).length, 'productos');
+            console.log('✅ Catálogo cargado desde JSON local (fallback):', Object.keys(catalogoProductos).length, 'productos');
         } else {
             console.warn('⚠️ No se encontró productos.json');
         }
@@ -457,16 +487,29 @@ window.actualizarCatalogo = async function() {
     
     try {
         // Mostrar toast de cargando
-        mostrarToast('🔄 Actualizando catálogo...', 'info');
+        mostrarToast('🔄 Actualizando desde Supabase...', 'info');
         
-        // Descargar productos.json con timestamp para evitar caché
-        const response = await fetch('/productos.json?v=' + Date.now());
+        // Descargar desde Supabase
+        const response = await fetch('https://hmuufyyxbfksslbstjra.supabase.co/rest/v1/productos?select=*', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'apikey': 'sb_publishable_hfCaIjbpKHiFUuZjl32BTg_hPe3s0Jl',
+                'Authorization': 'Bearer sb_publishable_hfCaIjbpKHiFUuZjl32BTg_hPe3s0Jl'
+            }
+        });
         
         if (!response.ok) {
             throw new Error('Error al descargar: ' + response.status);
         }
         
-        const nuevosCatalogo = await response.json();
+        const productosArray = await response.json();
+        
+        // Convertir array a objeto
+        const nuevosCatalogo = {};
+        productosArray.forEach(item => {
+            nuevosCatalogo[item.id] = JSON.parse(item.data);
+        });
         
         // Actualizar catálogo en memoria
         catalogoProductos = nuevosCatalogo;
