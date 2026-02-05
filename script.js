@@ -296,7 +296,7 @@ window.closeModal = function(id) {
 window.toggleFavorito = function() {
     if (!currentProducto) return;
     
-    if (confirm(`¿Eliminar ${currentProducto.nom} de tu despensa?`)) {
+ if (confirm('¿Eliminar ' + currentProducto.nom + ' de tu despensa?')) {
         miDespensa[currentProducto.cat] = miDespensa[currentProducto.cat].filter(p => p.uniqueId !== currentProducto.uniqueId);
         saveData();
         closeModal('modal-producto');
