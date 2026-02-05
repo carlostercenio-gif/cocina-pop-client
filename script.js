@@ -134,13 +134,14 @@ function renderHome() {
     el.innerHTML = todos.map(p => {
         const diasVenc = calcularDiasVencimiento(p.vencimiento);
         const alertaVenc = diasVenc <= 3 ? '⚠️' : '';
+        const loteInfo = p.numeroLote ? ` • ${p.numeroLote}` : '';
         
         return `
         <div class="fav-item" onclick="verDetalleProducto('${p.uniqueId}', '${p.cat}')">
             <div class="fav-item-emoji">${p.emoji || '📦'}</div>
             <div class="fav-item-info">
                 <strong>${p.nom}</strong>
-                <small>${p.cat} • Vence: ${formatDate(p.vencimiento)} ${alertaVenc}</small>
+                <small>${p.cat}${loteInfo} • Vence: ${formatDate(p.vencimiento)} ${alertaVenc}</small>
             </div>
             <button class="fav-item-btn" onclick="event.stopPropagation(); pedirProducto('${p.uniqueId}', '${p.cat}')">
                 <i class="fa-brands fa-whatsapp"></i> Pedir
@@ -173,12 +174,14 @@ function renderMarket() {
         const diasVenc = calcularDiasVencimiento(p.vencimiento);
         const alertaVenc = diasVenc <= 3 ? '⚠️ ' : '';
         const textoVenc = diasVenc < 0 ? 'VENCIDO' : diasVenc === 0 ? 'Vence HOY' : `${diasVenc} días`;
+        const loteInfo = p.numeroLote || '';
         
         return `
             <div class="cat-card" onclick="verDetalleProducto('${p.uniqueId}', 'MARKET')">
                 <div class="cat-card-img">${p.emoji || '📦'}</div>
                 <div class="cat-card-info">
                     <strong>${p.nom}</strong>
+                    ${loteInfo ? `<div style="font-size:11px; opacity:0.7; margin:2px 0;">${loteInfo}</div>` : ''}
                     <div class="cat-card-precio">$${formatPrecio(p.precio)}</div>
                     <div class="cat-card-unidades">${alertaVenc}${textoVenc}</div>
                 </div>
@@ -200,13 +203,14 @@ function renderFreezer() {
         const diasVenc = calcularDiasVencimiento(p.vencimiento);
         const alertaVenc = diasVenc <= 3 ? '⚠️ ' : '';
         const textoVenc = diasVenc < 0 ? 'VENCIDO' : diasVenc === 0 ? 'Vence HOY' : `${diasVenc} días`;
+        const loteInfo = p.numeroLote ? ` • ${p.numeroLote}` : '';
         
         return `
             <div class="fav-page-item">
                 <div class="fav-page-item-emoji">${p.emoji || '📦'}</div>
                 <div class="fav-page-item-info">
                     <strong>${p.nom}</strong>
-                    <small>$${formatPrecio(p.precio)} • ${alertaVenc}${textoVenc}</small>
+                    <small>$${formatPrecio(p.precio)}${loteInfo} • ${alertaVenc}${textoVenc}</small>
                 </div>
                 <div class="fav-page-item-actions">
                     <button class="btn-repedir" onclick="verDetalleProducto('${p.uniqueId}', 'FREEZER')">
@@ -234,13 +238,14 @@ function renderHeladera() {
         const diasVenc = calcularDiasVencimiento(p.vencimiento);
         const alertaVenc = diasVenc <= 3 ? '⚠️ ' : '';
         const textoVenc = diasVenc < 0 ? 'VENCIDO' : diasVenc === 0 ? 'Vence HOY' : `${diasVenc} días`;
+        const loteInfo = p.numeroLote ? ` • ${p.numeroLote}` : '';
         
         return `
             <div class="historial-item">
                 <div class="historial-item-emoji">${p.emoji || '📦'}</div>
                 <div class="historial-item-info">
                     <strong>${p.nom}</strong>
-                    <small>$${formatPrecio(p.precio)} • ${alertaVenc}${textoVenc}</small>
+                    <small>$${formatPrecio(p.precio)}${loteInfo} • ${alertaVenc}${textoVenc}</small>
                 </div>
                 <div style="display:flex; gap:6px;">
                     <button class="historial-repedir" onclick="verDetalleProducto('${p.uniqueId}', 'HELADERA')">
@@ -333,7 +338,7 @@ window.startScanner = function() {
         scanner = new Html5Qrcode("reader");
     }
     
-    scanner.start(
+   scanner.start(
         { facingMode: "environment" },
         { fps: 10, qrbox: 220 },
         (texto) => {
@@ -342,10 +347,10 @@ window.startScanner = function() {
                 try {
                     const qrData = JSON.parse(texto);
                     
-                    // QR simple trae solo: {"id":"p_123"}
                     if (qrData.id && catalogoProductos[qrData.id]) {
                         const producto = catalogoProductos[qrData.id];
-                        agregarProductoEscaneado(producto, qrData.id);
+                        // Pasar también la info del lote si existe
+                        agregarProductoEscaneado(producto, qrData.id, qrData);
                     } else {
                         console.error('Producto no encontrado en catálogo:', qrData.id);
                         document.getElementById('modal-no-encontrado').classList.add('active');
@@ -361,7 +366,6 @@ window.startScanner = function() {
         alert("No se pudo acceder a la cámara");
     });
 };
-
 window.closeScanner = function() {
     document.getElementById('modal-scanner').classList.remove('active');
     if (scanner) {
@@ -373,18 +377,26 @@ window.closeScanner = function() {
 // ═══════════════════════════════════════════════
 // ✅ AGREGAR PRODUCTO ESCANEADO
 // ═══════════════════════════════════════════════
-function agregarProductoEscaneado(producto, id) {
+function agregarProductoEscaneado(producto, id, qrData) {
     // Verificar categoría válida
     if (!['MARKET', 'FREEZER', 'HELADERA'].includes(producto.cat)) {
         alert('Este producto no es para clientes (categoría: ' + producto.cat + ')');
         return;
     }
     
-    // Obtener vencimiento del lote más viejo (FIFO)
+    // Obtener vencimiento y número de lote
     let vencimiento = null;
-    if (producto.lotes && producto.lotes.length > 0) {
+    let numeroLote = null;
+    
+    if (qrData && qrData.vencimiento) {
+        // Si el QR trae info específica del lote, usar esa
+        vencimiento = qrData.vencimiento;
+        numeroLote = qrData.numeroLote || 'Lote ' + (qrData.loteIndex + 1);
+    } else if (producto.lotes && producto.lotes.length > 0) {
+        // Fallback: usar el lote más viejo (FIFO)
         const lotesSorted = [...producto.lotes].sort((a, b) => new Date(a.ven) - new Date(b.ven));
         vencimiento = lotesSorted[0].ven;
+        numeroLote = 'Lote 1';
     }
     
     // Crear objeto para Mi Despensa con ID único
@@ -396,6 +408,7 @@ function agregarProductoEscaneado(producto, id) {
         emoji: producto.emoji || '📦',
         cat: producto.cat,
         vencimiento: vencimiento,
+        numeroLote: numeroLote,
         videos: producto.videos || {},
         tips: producto.tips || [],
         fechaEscaneo: new Date().toISOString()
