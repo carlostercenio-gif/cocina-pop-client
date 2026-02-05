@@ -296,31 +296,13 @@ window.closeModal = function(id) {
 window.toggleFavorito = function() {
     if (!currentProducto) return;
     
- if (confirm('¿Eliminar ' + currentProducto.nom + ' de tu despensa?')) {
+    if (confirm('¿Eliminar ' + currentProducto.nom + ' de tu despensa?')) {
         miDespensa[currentProducto.cat] = miDespensa[currentProducto.cat].filter(p => p.uniqueId !== currentProducto.uniqueId);
         saveData();
         closeModal('modal-producto');
         renderAll();
     }
 };
-```
-
----
-
-## 🔑 CAMBIOS:
-
-- Línea 4: Arreglé sintaxis del `confirm()` (tenía backticks raros)
-- Línea 5: `p.id !== currentProducto.id` → `p.uniqueId !== currentProducto.uniqueId`
-
-**Pegá esto encima!** ✅
-
----
-
-## 🎉 LISTO! YA ESTÁN TODAS LAS FUNCIONES ACTUALIZADAS
-
-Ahora hacé **commit y push** del cliente:
-```
-Mensaje: "✨ Sistema FIFO - Permite duplicados ordenados por vencimiento"
 
 // ═══════════════════════════════════════════════
 // 💬 WHATSAPP
