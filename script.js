@@ -375,6 +375,7 @@ window.closeScanner = function() {
 
 // ═══════════════════════════════════════════════
 // ═══════════════════════════════════════════════
+// ═══════════════════════════════════════════════
 // ✅ AGREGAR PRODUCTO ESCANEADO
 // ═══════════════════════════════════════════════
 function agregarProductoEscaneado(producto, id, qrData) {
@@ -388,12 +389,15 @@ function agregarProductoEscaneado(producto, id, qrData) {
     let vencimiento = null;
     let numeroLote = null;
     
-    if (qrData && qrData.vencimiento) {
-        // Si el QR trae info específica del lote, usar esa
-        vencimiento = qrData.vencimiento;
-        numeroLote = qrData.numeroLote || 'Lote ' + (qrData.loteIndex + 1);
-    } else if (producto.lotes && producto.lotes.length > 0) {
-        // Fallback: usar el lote más viejo (FIFO)
+    if (qrData) {
+        // ✅ SOPORTA AMBOS FORMATOS (compacto y normal)
+        vencimiento = qrData.v || qrData.vencimiento;
+        const loteIdx = qrData.l !== undefined ? qrData.l : qrData.loteIndex;
+        numeroLote = qrData.n || qrData.numeroLote || (loteIdx !== undefined ? 'Lote ' + (loteIdx + 1) : null);
+    }
+    
+    // Fallback: usar el lote más viejo (FIFO)
+    if (!vencimiento && producto.lotes && producto.lotes.length > 0) {
         const lotesSorted = [...producto.lotes].sort((a, b) => new Date(a.ven) - new Date(b.ven));
         vencimiento = lotesSorted[0].ven;
         numeroLote = 'Lote 1';
@@ -414,7 +418,7 @@ function agregarProductoEscaneado(producto, id, qrData) {
         fechaEscaneo: new Date().toISOString()
     };
     
-    // Agregar a la categoría correspondiente (sin verificar duplicados)
+    // Agregar a la categoría correspondiente
     miDespensa[producto.cat].push(productoParaDespensa);
     
     // Ordenar por vencimiento (FIFO - primero los que vencen antes)
@@ -426,7 +430,7 @@ function agregarProductoEscaneado(producto, id, qrData) {
     
     saveData();
     
-    // Mostrar confirmación
+    // Mostrar confirmación (✅ arreglé el error del alert)
     alert(`✅ "${producto.nom}" agregado a ${producto.cat}`);
     
     // Actualizar vistas
