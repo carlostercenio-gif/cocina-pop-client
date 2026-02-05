@@ -26,12 +26,11 @@
 <!-- ═══ APP ═══ -->
 <div id="app">
 
-    <!-- HEADER -->
+<!-- HEADER -->
     <header class="header">
         <div class="logo">COCINA <span>POP</span></div>
-        <i class="fa-solid fa-bolt header-icon"></i>
+        <i class="fa-solid fa-bolt header-icon" onclick="actualizarCatalogo()" style="cursor:pointer;" title="Actualizar catálogo"></i>
     </header>
-
     <!-- ─── HOME ─── -->
     <main id="page-home" class="page active">
         <div class="scan-btn" onclick="startScanner()">
@@ -40,18 +39,15 @@
                 <span>ESCANEAR PRODUCTO</span>
             </div>
         </div>
-
         <div class="section-title">📦 ÚLTIMOS PRODUCTOS</div>
         <div id="favoritos-home">
             <p class="empty-msg">Escaneá tu primer producto</p>
         </div>
-
         <div class="section-title">📊 RESUMEN</div>
         <div id="ultimo-pedido">
             <p class="empty-msg">Tu despensa está vacía</p>
         </div>
     </main>
-
     <!-- ─── MARKET ─── -->
     <main id="page-catalogo" class="page">
         <div class="section-title">🛒 MI MARKET</div>
@@ -134,3 +130,4 @@
 </script>
 </body>
 </html>
+
