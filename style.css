@@ -519,3 +519,56 @@ body {
 .modal-no-emoji { font-size: 60px; margin: 10px 0 16px; }
 .modal-no-titulo { color: #fff; margin-bottom: 8px; font-size: 20px; }
 .modal-no-texto { opacity: 0.5; color: var(--text); margin-bottom: 22px; font-size: 13px; line-height: 1.5; }
+
+/* ═══════════════════════════════════════════════════════════════════
+   ⚡ TOASTS DE ACTUALIZACIÓN
+   ═══════════════════════════════════════════════════════════════════ */
+
+.toast-notification {
+    position: fixed;
+    top: 80px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-20px);
+    background: #333;
+    color: white;
+    padding: 15px 25px;
+    border-radius: 50px;
+    font-weight: 900;
+    font-size: 13px;
+    letter-spacing: 0.5px;
+    z-index: 10000;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+    opacity: 0;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    pointer-events: none;
+}
+
+.toast-notification.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
+.toast-success {
+    background: linear-gradient(135deg, #4caf50, #45a049);
+}
+
+.toast-error {
+    background: linear-gradient(135deg, #ff4757, #e84118);
+}
+
+.toast-info {
+    background: linear-gradient(135deg, #333, #444);
+}
+
+.header-icon {
+    transition: all 0.3s ease;
+}
+
+.header-icon:hover {
+    transform: scale(1.1);
+    color: var(--yellow);
+}
+
+.header-icon:active {
+    transform: scale(0.95);
+}
