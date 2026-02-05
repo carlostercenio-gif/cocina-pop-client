@@ -401,14 +401,6 @@ function agregarProductoEscaneado(producto, id) {
         return;
     }
     
-    // Verificar si ya existe en esa categoría
-    const yaExiste = miDespensa[producto.cat].some(p => p.id === id);
-    
-    if (yaExiste) {
-        alert(`Ya tenés "${producto.nom}" en tu ${producto.cat}`);
-        return;
-    }
-    
     // Obtener vencimiento del lote más viejo (FIFO)
     let vencimiento = null;
     if (producto.lotes && producto.lotes.length > 0) {
@@ -416,9 +408,10 @@ function agregarProductoEscaneado(producto, id) {
         vencimiento = lotesSorted[0].ven;
     }
     
-    // Crear objeto para Mi Despensa
+    // Crear objeto para Mi Despensa con ID único
     const productoParaDespensa = {
         id: id,
+        uniqueId: id + '_' + Date.now(), // ID único para permitir duplicados
         nom: producto.nom,
         precio: producto.pre,
         emoji: producto.emoji || '📦',
@@ -429,8 +422,16 @@ function agregarProductoEscaneado(producto, id) {
         fechaEscaneo: new Date().toISOString()
     };
     
-    // Agregar a la categoría correspondiente
+    // Agregar a la categoría correspondiente (sin verificar duplicados)
     miDespensa[producto.cat].push(productoParaDespensa);
+    
+    // Ordenar por vencimiento (FIFO - primero los que vencen antes)
+    miDespensa[producto.cat].sort((a, b) => {
+        if (!a.vencimiento) return 1;
+        if (!b.vencimiento) return -1;
+        return new Date(a.vencimiento) - new Date(b.vencimiento);
+    });
+    
     saveData();
     
     // Mostrar confirmación
@@ -439,7 +440,6 @@ function agregarProductoEscaneado(producto, id) {
     // Actualizar vistas
     renderAll();
 }
-
 // ═══════════════════════════════════════════════
 // 🔄 RENDER ALL
 // ═══════════════════════════════════════════════
