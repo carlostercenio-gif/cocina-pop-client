@@ -338,7 +338,7 @@ window.startScanner = function() {
         scanner = new Html5Qrcode("reader");
     }
     
-   scanner.start(
+    scanner.start(
         { facingMode: "environment" },
         { fps: 10, qrbox: 220 },
         (texto) => {
@@ -347,12 +347,15 @@ window.startScanner = function() {
                 try {
                     const qrData = JSON.parse(texto);
                     
-                    if (qrData.id && catalogoProductos[qrData.id]) {
-                        const producto = catalogoProductos[qrData.id];
+                    // ✅ SOPORTA AMBOS FORMATOS (compacto "i" y normal "id")
+                    const productId = qrData.i || qrData.id;
+                    
+                    if (productId && catalogoProductos[productId]) {
+                        const producto = catalogoProductos[productId];
                         // Pasar también la info del lote si existe
-                        agregarProductoEscaneado(producto, qrData.id, qrData);
+                        agregarProductoEscaneado(producto, productId, qrData);
                     } else {
-                        console.error('Producto no encontrado en catálogo:', qrData.id);
+                        console.error('Producto no encontrado en catálogo:', productId);
                         document.getElementById('modal-no-encontrado').classList.add('active');
                     }
                 } catch(e) {
@@ -366,6 +369,7 @@ window.startScanner = function() {
         alert("No se pudo acceder a la cámara");
     });
 };
+
 window.closeScanner = function() {
     document.getElementById('modal-scanner').classList.remove('active');
     if (scanner) {
