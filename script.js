@@ -445,8 +445,101 @@ function formatPrecio(num) {
     return num.toLocaleString('es-AR');
 }
 
+// ═══════════════════════════════════════════════════════════════════
+// ⚡ ACTUALIZAR CATÁLOGO
+// ═══════════════════════════════════════════════════════════════════
+
+window.actualizarCatalogo = async function() {
+    const icono = document.querySelector('.header-icon');
+    
+    // Animación de loading
+    icono.classList.add('fa-spin');
+    
+    try {
+        // Mostrar toast de cargando
+        mostrarToast('🔄 Actualizando catálogo...', 'info');
+        
+        // Descargar productos.json con timestamp para evitar caché
+        const response = await fetch('/productos.json?v=' + Date.now());
+        
+        if (!response.ok) {
+            throw new Error('Error al descargar: ' + response.status);
+        }
+        
+        const nuevosCatalogo = await response.json();
+        
+        // Actualizar catálogo en memoria
+        catalogoProductos = nuevosCatalogo;
+        
+        const cantProductos = Object.keys(nuevosCatalogo).length;
+        
+        // Quitar animación
+        icono.classList.remove('fa-spin');
+        
+        // Toast de éxito con cantidad de productos
+        mostrarToast(`✅ ${cantProductos} productos actualizados`, 'success');
+        
+        // Efecto visual en el rayo (verde por 1 segundo)
+        icono.style.color = '#4caf50';
+        icono.style.textShadow = '0 0 10px rgba(76, 175, 80, 0.5)';
+        setTimeout(() => { 
+            icono.style.color = ''; 
+            icono.style.textShadow = '';
+        }, 1000);
+        
+        // Vibración táctil si está disponible
+        if (navigator.vibrate) {
+            navigator.vibrate(50);
+        }
+        
+    } catch (error) {
+        console.error('Error al actualizar:', error);
+        
+        // Quitar animación
+        icono.classList.remove('fa-spin');
+        
+        // Toast de error
+        mostrarToast('❌ Error al actualizar. Intenta de nuevo.', 'error');
+        
+        // Efecto visual de error (rojo por 1 segundo)
+        icono.style.color = '#ff4757';
+        setTimeout(() => { icono.style.color = ''; }, 1000);
+    }
+};
+
+// ═══════════════════════════════════════════════════════════════════
+// 🍞 SISTEMA DE TOASTS
+// ═══════════════════════════════════════════════════════════════════
+
+function mostrarToast(mensaje, tipo = 'info') {
+    // Remover toast anterior si existe
+    const toastAnterior = document.querySelector('.toast-notification');
+    if (toastAnterior) toastAnterior.remove();
+    
+    // Crear toast
+    const toast = document.createElement('div');
+    toast.className = 'toast-notification toast-' + tipo;
+    toast.textContent = mensaje;
+    
+    // Agregar al DOM
+    document.body.appendChild(toast);
+    
+    // Trigger animación de entrada
+    setTimeout(() => toast.classList.add('show'), 10);
+    
+    // Auto-remover después de 2.5s
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 300);
+    }, 2500);
+    
+    // Vibración táctil sutil
+    if (navigator.vibrate && tipo === 'success') {
+        navigator.vibrate(30);
+    }
+}
+
 // ═══════════════════════════════════════════════
 console.log('🥑 Cocina Pop Client - Mi Despensa Iniciado');
 // ═══════════════════════════════════════════════
-
 })();
