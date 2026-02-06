@@ -1,7 +1,7 @@
 {
-  "name": "Cocina Pop - Scan for Flavor",
+  "name": "Cocina Pop - Mi Despensa",
   "short_name": "Cocina Pop",
-  "description": "Descargá recetas y pedidos de Cocina Pop",
+  "description": "Tu despensa inteligente - Escanea, organiza y cocina",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#0a0a0a",
@@ -9,25 +9,10 @@
   "orientation": "portrait",
   "icons": [
     {
-      "src": "/android-icon-192x192.png",
-      "sizes": "192x192",
+      "src": "/ms-icon-310x310.png",
+      "sizes": "310x310",
       "type": "image/png",
       "purpose": "any maskable"
-    },
-    {
-      "src": "/apple-icon-180x180.png",
-      "sizes": "180x180",
-      "type": "image/png"
-    },
-    {
-      "src": "/ms-icon-144x144.png",
-      "sizes": "144x144",
-      "type": "image/png"
-    },
-    {
-      "src": "/favicon-96x96.png",
-      "sizes": "96x96",
-      "type": "image/png"
     }
   ]
 }
