@@ -578,7 +578,136 @@ function mostrarToast(mensaje, tipo = 'info') {
     }
 }
 
+// ═══════════════════════════════════════════════════════════════════
+// 📱 PROMPT DE INSTALACIÓN PWA
+// ═══════════════════════════════════════════════════════════════════
+
+let deferredPrompt;
+let installBanner = null;
+
+// Capturar evento de instalación
+window.addEventListener('beforeinstallprompt', (e) => {
+    // Prevenir que Chrome muestre su propio mini-infobar
+    e.preventDefault();
+    
+    // Guardar el evento para usarlo después
+    deferredPrompt = e;
+    
+    // Mostrar banner personalizado
+    mostrarBannerInstalacion();
+});
+
+function mostrarBannerInstalacion() {
+    // Solo mostrar si no está ya instalado
+    if (window.matchMedia('(display-mode: standalone)').matches) {
+        return; // Ya está instalada
+    }
+    
+    // Crear banner
+    installBanner = document.createElement('div');
+    installBanner.id = 'install-banner';
+    installBanner.innerHTML = `
+        <div style="display:flex; align-items:center; gap:12px; flex:1;">
+            <div style="font-size:28px;">📱</div>
+            <div style="flex:1;">
+                <strong style="display:block; font-size:14px;">Instalá Cocina Pop</strong>
+                <small style="font-size:11px; opacity:0.8;">Acceso rápido desde tu pantalla</small>
+            </div>
+        </div>
+        <div style="display:flex; gap:8px;">
+            <button onclick="instalarApp()" style="background:#FFEF00; color:#000; border:none; padding:10px 20px; border-radius:20px; font-weight:900; font-size:13px; cursor:pointer;">
+                INSTALAR
+            </button>
+            <button onclick="cerrarBannerInstalacion()" style="background:transparent; color:#fff; border:1px solid rgba(255,255,255,0.3); padding:10px 16px; border-radius:20px; font-weight:700; font-size:13px; cursor:pointer;">
+                ✕
+            </button>
+        </div>
+    `;
+    
+    // Estilos del banner
+    installBanner.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
+        color: white;
+        padding: 16px 20px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        z-index: 9999;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        transform: translateY(-100%);
+        transition: transform 0.3s ease;
+    `;
+    
+    document.body.appendChild(installBanner);
+    
+    // Animar entrada
+    setTimeout(() => {
+        installBanner.style.transform = 'translateY(0)';
+    }, 100);
+    
+    // Ajustar padding del header para que no tape
+    const header = document.querySelector('.header');
+    if (header) {
+        header.style.marginTop = '70px';
+    }
+}
+
+window.instalarApp = async function() {
+    if (!deferredPrompt) {
+        alert('La instalación no está disponible en este momento');
+        return;
+    }
+    
+    // Mostrar prompt nativo
+    deferredPrompt.prompt();
+    
+    // Esperar respuesta del usuario
+    const { outcome } = await deferredPrompt.userChoice;
+    
+    if (outcome === 'accepted') {
+        console.log('✅ Usuario aceptó instalar');
+    } else {
+        console.log('❌ Usuario rechazó instalar');
+    }
+    
+    // Limpiar
+    deferredPrompt = null;
+    cerrarBannerInstalacion();
+};
+
+window.cerrarBannerInstalacion = function() {
+    if (installBanner) {
+        installBanner.style.transform = 'translateY(-100%)';
+        
+        setTimeout(() => {
+            if (installBanner && installBanner.parentNode) {
+                installBanner.remove();
+            }
+            
+            // Restaurar header
+            const header = document.querySelector('.header');
+            if (header) {
+                header.style.marginTop = '';
+            }
+        }, 300);
+    }
+};
+
+// Detectar si ya está instalada
+window.addEventListener('appinstalled', () => {
+    console.log('✅ App instalada correctamente');
+    cerrarBannerInstalacion();
+    
+    // Mostrar mensaje de éxito
+    mostrarToast('✅ ¡App instalada! Ya podés acceder desde tu pantalla de inicio', 'success');
+});
+
 // ═══════════════════════════════════════════════
 console.log('🥑 Cocina Pop Client - Mi Despensa Iniciado');
 // ═══════════════════════════════════════════════
+
 })();
