@@ -432,7 +432,8 @@ function agregarProductoEscaneado(producto, id, qrData) {
         numeroLote: numeroLote,
         videos: producto.videos || {},
         tips: producto.tips || [],
-        fechaEscaneo: new Date().toISOString()
+        fechaEscaneo: new Date().toISOString(),
+        fechaCreacion: producto.fechaCreacion || new Date().toISOString()
     };
     
     // Agregar a la categoría correspondiente
@@ -558,7 +559,6 @@ window.actualizarCatalogo = async function() {
         setTimeout(() => { icono.style.color = ''; }, 1000);
     }
 };
-
 // ═══════════════════════════════════════════════════════════════════
 // 🍞 SISTEMA DE TOASTS
 // ═══════════════════════════════════════════════════════════════════
