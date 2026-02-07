@@ -176,8 +176,13 @@ function renderMarket() {
         const textoVenc = diasVenc < 0 ? 'VENCIDO' : diasVenc === 0 ? 'Vence HOY' : `${diasVenc} días`;
         const loteInfo = p.numeroLote || '';
         
+        // Detectar si es producto nuevo (últimos 7 días)
+        const esNuevo = p.fechaCreacion ? 
+            (new Date() - new Date(p.fechaCreacion)) / (1000 * 60 * 60 * 24) <= 7 : false;
+        
         return `
             <div class="cat-card" onclick="verDetalleProducto('${p.uniqueId}', 'MARKET')">
+                ${esNuevo ? '<div class="badge-nuevo">NUEVO 🔥</div>' : ''}
                 <div class="cat-card-img">${p.emoji || '📦'}</div>
                 <div class="cat-card-info">
                     <strong>${p.nom}</strong>
@@ -188,7 +193,6 @@ function renderMarket() {
             </div>`;
     }).join('');
 }
-
 // ═══════════════════════════════════════════════
 // ❄️ FREEZER
 // ═══════════════════════════════════════════════
@@ -205,8 +209,13 @@ function renderFreezer() {
         const textoVenc = diasVenc < 0 ? 'VENCIDO' : diasVenc === 0 ? 'Vence HOY' : `${diasVenc} días`;
         const loteInfo = p.numeroLote ? ` • ${p.numeroLote}` : '';
         
+        // Detectar si es producto nuevo (últimos 7 días)
+        const esNuevo = p.fechaCreacion ? 
+            (new Date() - new Date(p.fechaCreacion)) / (1000 * 60 * 60 * 24) <= 7 : false;
+        
         return `
-            <div class="fav-page-item">
+            <div class="fav-page-item" style="position:relative;">
+                ${esNuevo ? '<div class="badge-nuevo">NUEVO 🔥</div>' : ''}
                 <div class="fav-page-item-emoji">${p.emoji || '📦'}</div>
                 <div class="fav-page-item-info">
                     <strong>${p.nom}</strong>
@@ -223,7 +232,6 @@ function renderFreezer() {
             </div>`;
     }).join('');
 }
-
 // ═══════════════════════════════════════════════
 // 🧊 HELADERA
 // ═══════════════════════════════════════════════
@@ -240,8 +248,13 @@ function renderHeladera() {
         const textoVenc = diasVenc < 0 ? 'VENCIDO' : diasVenc === 0 ? 'Vence HOY' : `${diasVenc} días`;
         const loteInfo = p.numeroLote ? ` • ${p.numeroLote}` : '';
         
+        // Detectar si es producto nuevo (últimos 7 días)
+        const esNuevo = p.fechaCreacion ? 
+            (new Date() - new Date(p.fechaCreacion)) / (1000 * 60 * 60 * 24) <= 7 : false;
+        
         return `
-            <div class="historial-item">
+            <div class="historial-item" style="position:relative;">
+                ${esNuevo ? '<div class="badge-nuevo">NUEVO 🔥</div>' : ''}
                 <div class="historial-item-emoji">${p.emoji || '📦'}</div>
                 <div class="historial-item-info">
                     <strong>${p.nom}</strong>
