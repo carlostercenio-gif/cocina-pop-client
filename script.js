@@ -41,12 +41,12 @@ async function loadData() {
 async function cargarCatalogo() {
     try {
         // Intentar cargar desde Supabase
-        const response = await fetch('https://hmuufyyxbfksslbstjra.supabase.co/rest/v1/productos?select=*', {
+        const response = await fetch('https://ihbjoltcrisiqkcvggmq.supabase.co/rest/v1/productos?select=*', {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
-                'apikey': 'sb_publishable_hfCaIjbpKHiFUuZjl32BTg_hPe3s0Jl',
-                'Authorization': 'Bearer sb_publishable_hfCaIjbpKHiFUuZjl32BTg_hPe3s0Jl'
+                'apikey': 'sb_publishable_4HRUBcFa2mVj-trIX7l0lw_1_veRoIk',
+                'Authorization': 'Bearer sb_publishable_4HRUBcFa2mVj-trIX7l0lw_1_veRoIk'
             }
         });
         if (response.ok) {
@@ -505,12 +505,12 @@ window.actualizarCatalogo = async function() {
         mostrarToast('🔄 Actualizando desde Supabase...', 'info');
         
         // Descargar desde Supabase
-        const response = await fetch('https://hmuufyyxbfksslbstjra.supabase.co/rest/v1/productos?select=*', {
+        const response = await fetch('https://ihbjoltcrisiqkcvggmq.supabase.co/rest/v1/productos?select=*', {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
-                'apikey': 'sb_publishable_hfCaIjbpKHiFUuZjl32BTg_hPe3s0Jl',
-                'Authorization': 'Bearer sb_publishable_hfCaIjbpKHiFUuZjl32BTg_hPe3s0Jl'
+                'apikey': 'sb_publishable_4HRUBcFa2mVj-trIX7l0lw_1_veRoIk',
+                'Authorization': 'Bearer sb_publishable_4HRUBcFa2mVj-trIX7l0lw_1_veRoIk'
             }
         });
         
