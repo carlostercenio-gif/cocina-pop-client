@@ -176,13 +176,8 @@ function renderMarket() {
         const textoVenc = diasVenc < 0 ? 'VENCIDO' : diasVenc === 0 ? 'Vence HOY' : `${diasVenc} días`;
         const loteInfo = p.numeroLote || '';
         
-        // Detectar si es producto nuevo (últimos 7 días)
-        const esNuevo = p.fechaCreacion ? 
-            (new Date() - new Date(p.fechaCreacion)) / (1000 * 60 * 60 * 24) <= 7 : false;
-        
         return `
             <div class="cat-card" onclick="verDetalleProducto('${p.uniqueId}', 'MARKET')">
-                ${esNuevo ? '<div class="badge-nuevo">NUEVO 🔥</div>' : ''}
                 <div class="cat-card-img">${p.emoji || '📦'}</div>
                 <div class="cat-card-info">
                     <strong>${p.nom}</strong>
@@ -193,6 +188,7 @@ function renderMarket() {
             </div>`;
     }).join('');
 }
+
 // ═══════════════════════════════════════════════
 // ❄️ FREEZER
 // ═══════════════════════════════════════════════
@@ -209,13 +205,8 @@ function renderFreezer() {
         const textoVenc = diasVenc < 0 ? 'VENCIDO' : diasVenc === 0 ? 'Vence HOY' : `${diasVenc} días`;
         const loteInfo = p.numeroLote ? ` • ${p.numeroLote}` : '';
         
-        // Detectar si es producto nuevo (últimos 7 días)
-        const esNuevo = p.fechaCreacion ? 
-            (new Date() - new Date(p.fechaCreacion)) / (1000 * 60 * 60 * 24) <= 7 : false;
-        
         return `
-            <div class="fav-page-item" style="position:relative;">
-                ${esNuevo ? '<div class="badge-nuevo">NUEVO 🔥</div>' : ''}
+            <div class="fav-page-item">
                 <div class="fav-page-item-emoji">${p.emoji || '📦'}</div>
                 <div class="fav-page-item-info">
                     <strong>${p.nom}</strong>
@@ -232,6 +223,7 @@ function renderFreezer() {
             </div>`;
     }).join('');
 }
+
 // ═══════════════════════════════════════════════
 // 🧊 HELADERA
 // ═══════════════════════════════════════════════
@@ -248,13 +240,8 @@ function renderHeladera() {
         const textoVenc = diasVenc < 0 ? 'VENCIDO' : diasVenc === 0 ? 'Vence HOY' : `${diasVenc} días`;
         const loteInfo = p.numeroLote ? ` • ${p.numeroLote}` : '';
         
-        // Detectar si es producto nuevo (últimos 7 días)
-        const esNuevo = p.fechaCreacion ? 
-            (new Date() - new Date(p.fechaCreacion)) / (1000 * 60 * 60 * 24) <= 7 : false;
-        
         return `
-            <div class="historial-item" style="position:relative;">
-                ${esNuevo ? '<div class="badge-nuevo">NUEVO 🔥</div>' : ''}
+            <div class="historial-item">
                 <div class="historial-item-emoji">${p.emoji || '📦'}</div>
                 <div class="historial-item-info">
                     <strong>${p.nom}</strong>
@@ -357,44 +344,22 @@ window.startScanner = function() {
         (texto) => {
             closeScanner();
             setTimeout(() => {
-                let productId = null;
-                let qrData = null;
-                
-                // ✅ NUEVO: Detectar formato simplificado (p_123_L0 o p_123)
-                if (texto.includes('_L')) {
-                    // Es un lote simplificado: "p_123_L0"
-                    const partes = texto.split('_L');
-                    productId = partes[0];
-                    const loteIdx = parseInt(partes[1]);
+                try {
+                    const qrData = JSON.parse(texto);
                     
-                    // Crear objeto compatible
-                    qrData = {
-                        i: productId,
-                        l: loteIdx,
-                        n: 'Lote ' + (loteIdx + 1)
-                    };
-                } else if (!texto.startsWith('{')) {
-                    // Es un producto simplificado: "p_123"
-                    productId = texto;
-                    qrData = { i: productId };
-                } else {
-                    // ✅ COMPATIBILIDAD: QR viejos en JSON
-                    try {
-                        qrData = JSON.parse(texto);
-                        productId = qrData.i || qrData.id;
-                    } catch(e) {
-                        console.error('Error parseando QR JSON:', e);
+                    // ✅ SOPORTA AMBOS FORMATOS (compacto "i" y normal "id")
+                    const productId = qrData.i || qrData.id;
+                    
+                    if (productId && catalogoProductos[productId]) {
+                        const producto = catalogoProductos[productId];
+                        // Pasar también la info del lote si existe
+                        agregarProductoEscaneado(producto, productId, qrData);
+                    } else {
+                        console.error('Producto no encontrado en catálogo:', productId);
                         document.getElementById('modal-no-encontrado').classList.add('active');
-                        return;
                     }
-                }
-                
-                // Buscar producto en catálogo
-                if (productId && catalogoProductos[productId]) {
-                    const producto = catalogoProductos[productId];
-                    agregarProductoEscaneado(producto, productId, qrData);
-                } else {
-                    console.error('Producto no encontrado en catálogo:', productId);
+                } catch(e) {
+                    console.error('Error parseando QR:', e);
                     document.getElementById('modal-no-encontrado').classList.add('active');
                 }
             }, 350);
@@ -403,6 +368,13 @@ window.startScanner = function() {
         console.log("Error cámara:", err);
         alert("No se pudo acceder a la cámara");
     });
+};
+
+window.closeScanner = function() {
+    document.getElementById('modal-scanner').classList.remove('active');
+    if (scanner) {
+        scanner.stop().catch(() => {});
+    }
 };
 
 // ═══════════════════════════════════════════════
@@ -447,8 +419,7 @@ function agregarProductoEscaneado(producto, id, qrData) {
         numeroLote: numeroLote,
         videos: producto.videos || {},
         tips: producto.tips || [],
-        fechaEscaneo: new Date().toISOString(),
-        fechaCreacion: producto.fechaCreacion || new Date().toISOString()
+        fechaEscaneo: new Date().toISOString()
     };
     
     // Agregar a la categoría correspondiente
@@ -574,6 +545,7 @@ window.actualizarCatalogo = async function() {
         setTimeout(() => { icono.style.color = ''; }, 1000);
     }
 };
+
 // ═══════════════════════════════════════════════════════════════════
 // 🍞 SISTEMA DE TOASTS
 // ═══════════════════════════════════════════════════════════════════
