@@ -351,14 +351,19 @@ window.startScanner = function() {
         scanner = new Html5Qrcode("reader");
     }
     
-    scanner.start(
-        { facingMode: "environment" },
-        { fps: 10, qrbox: 220 },
-        (texto) => {
-            closeScanner();
-            setTimeout(() => {
-                try {
-                    const qrData = JSON.parse(texto);
+   scanner.start(
+    { facingMode: "environment" },
+    { 
+        fps: 10, 
+        qrbox: 220,
+        disableFlip: false,
+        rememberLastUsedCamera: true
+    },
+    (texto) => {
+        closeScanner();
+        setTimeout(() => {
+            try {
+                const qrData = JSON.parse(texto);
                     
                     // ✅ SOPORTA AMBOS FORMATOS (compacto "i" y normal "id")
                     const productId = qrData.i || qrData.id;
