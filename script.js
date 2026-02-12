@@ -357,22 +357,44 @@ window.startScanner = function() {
         (texto) => {
             closeScanner();
             setTimeout(() => {
-                try {
-                    const qrData = JSON.parse(texto);
+                let productId = null;
+                let qrData = null;
+                
+                // ✅ NUEVO: Detectar formato simplificado (p_123_L0 o p_123)
+                if (texto.includes('_L')) {
+                    // Es un lote simplificado: "p_123_L0"
+                    const partes = texto.split('_L');
+                    productId = partes[0];
+                    const loteIdx = parseInt(partes[1]);
                     
-                    // ✅ SOPORTA AMBOS FORMATOS (compacto "i" y normal "id")
-                    const productId = qrData.i || qrData.id;
-                    
-                    if (productId && catalogoProductos[productId]) {
-                        const producto = catalogoProductos[productId];
-                        // Pasar también la info del lote si existe
-                        agregarProductoEscaneado(producto, productId, qrData);
-                    } else {
-                        console.error('Producto no encontrado en catálogo:', productId);
+                    // Crear objeto compatible
+                    qrData = {
+                        i: productId,
+                        l: loteIdx,
+                        n: 'Lote ' + (loteIdx + 1)
+                    };
+                } else if (!texto.startsWith('{')) {
+                    // Es un producto simplificado: "p_123"
+                    productId = texto;
+                    qrData = { i: productId };
+                } else {
+                    // ✅ COMPATIBILIDAD: QR viejos en JSON
+                    try {
+                        qrData = JSON.parse(texto);
+                        productId = qrData.i || qrData.id;
+                    } catch(e) {
+                        console.error('Error parseando QR JSON:', e);
                         document.getElementById('modal-no-encontrado').classList.add('active');
+                        return;
                     }
-                } catch(e) {
-                    console.error('Error parseando QR:', e);
+                }
+                
+                // Buscar producto en catálogo
+                if (productId && catalogoProductos[productId]) {
+                    const producto = catalogoProductos[productId];
+                    agregarProductoEscaneado(producto, productId, qrData);
+                } else {
+                    console.error('Producto no encontrado en catálogo:', productId);
                     document.getElementById('modal-no-encontrado').classList.add('active');
                 }
             }, 350);
@@ -381,13 +403,6 @@ window.startScanner = function() {
         console.log("Error cámara:", err);
         alert("No se pudo acceder a la cámara");
     });
-};
-
-window.closeScanner = function() {
-    document.getElementById('modal-scanner').classList.remove('active');
-    if (scanner) {
-        scanner.stop().catch(() => {});
-    }
 };
 
 // ═══════════════════════════════════════════════
