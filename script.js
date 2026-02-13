@@ -347,42 +347,69 @@ window.consultarWA = function() {
 window.startScanner = function() {
     document.getElementById('modal-scanner').classList.add('active');
     
-    if (!scanner) {
-        scanner = new Html5Qrcode("reader");
+    const readerDiv = document.getElementById('reader');
+    
+    if (scanner) {
+        scanner.getTracks().forEach(track => track.stop());
+        scanner = null;
+        readerDiv.innerHTML = '';
+        return;
     }
     
-   scanner.start(
-    { facingMode: "environment" },
-    { 
-        fps: 10, 
-        qrbox: 220,
-        disableFlip: false,
-        rememberLastUsedCamera: true
-    },
-    (texto) => {
-        closeScanner();
-        setTimeout(() => {
-            try {
-                const qrData = JSON.parse(texto);
-                    
-                    // ✅ SOPORTA AMBOS FORMATOS (compacto "i" y normal "id")
-                    const productId = qrData.i || qrData.id;
-                    
-                    if (productId && catalogoProductos[productId]) {
-                        const producto = catalogoProductos[productId];
-                        // Pasar también la info del lote si existe
-                        agregarProductoEscaneado(producto, productId, qrData);
-                    } else {
-                        console.error('Producto no encontrado en catálogo:', productId);
-                        document.getElementById('modal-no-encontrado').classList.add('active');
-                    }
-                } catch(e) {
-                    console.error('Error parseando QR:', e);
-                    document.getElementById('modal-no-encontrado').classList.add('active');
-                }
-            }, 350);
-        }
-    ).catch(err => {
+    // ✅ Video en PANTALLA COMPLETA con mejor calidad
+    readerDiv.innerHTML = '<video id="video" style="width:100%; height:400px; object-fit:cover; border-radius:15px; background:#000;"></video>';
+    const video = document.getElementById('video');
+    
+    navigator.mediaDevices.getUserMedia({ 
+        video: { 
+            facingMode: 'environment',
+            width: { ideal: 1920, min: 1280 },
+            height: { ideal: 1080, min: 720 },
+            focusMode: 'continuous',
+            zoom: true
+        } 
+    }).then(stream => {
+        video.srcObject = stream;
+        video.setAttribute('playsinline', true);
+        video.play();
+        scanner = stream;
+        
+        const codeReader = new ZXing.BrowserQRCodeReader();
+        
+        const scan = () => {
+            if (!scanner) return;
+            
+            codeReader.decodeOnceFromVideoDevice(undefined, 'video')
+                .then(result => {
+                    closeScanner();
+                    setTimeout(() => {
+                        try {
+                            const qrData = JSON.parse(result.text);
+                            
+                            // ✅ SOPORTA AMBOS FORMATOS (compacto "i" y normal "id")
+                            const productId = qrData.i || qrData.id;
+                            
+                            if (productId && catalogoProductos[productId]) {
+                                const producto = catalogoProductos[productId];
+                                // Pasar también la info del lote si existe
+                                agregarProductoEscaneado(producto, productId, qrData);
+                            } else {
+                                console.error('Producto no encontrado en catálogo:', productId);
+                                document.getElementById('modal-no-encontrado').classList.add('active');
+                            }
+                        } catch(e) {
+                            console.error('Error parseando QR:', e);
+                            document.getElementById('modal-no-encontrado').classList.add('active');
+                        }
+                    }, 350);
+                })
+                .catch(() => {
+                    if (scanner) setTimeout(scan, 100);
+                });
+        };
+        
+        scan();
+    }).catch(err => {
         console.log("Error cámara:", err);
         alert("No se pudo acceder a la cámara");
     });
@@ -391,7 +418,9 @@ window.startScanner = function() {
 window.closeScanner = function() {
     document.getElementById('modal-scanner').classList.remove('active');
     if (scanner) {
-        scanner.stop().catch(() => {});
+        scanner.getTracks().forEach(track => track.stop());
+        scanner = null;
+        document.getElementById('reader').innerHTML = '';
     }
 };
 
