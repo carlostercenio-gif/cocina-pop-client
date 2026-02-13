@@ -356,8 +356,8 @@ window.startScanner = function() {
         return;
     }
     
-    // ✅ Video en PANTALLA COMPLETA con mejor calidad
-    readerDiv.innerHTML = '<video id="video" style="width:100%; height:400px; object-fit:cover; border-radius:15px; background:#000;"></video>';
+    // ✅ Video MÁS GRANDE para mejor lectura
+    readerDiv.innerHTML = '<video id="video" style="width:100%; height:500px; object-fit:cover; border-radius:15px; background:#000;"></video>';
     const video = document.getElementById('video');
     
     navigator.mediaDevices.getUserMedia({ 
@@ -404,7 +404,7 @@ window.startScanner = function() {
                     }, 350);
                 })
                 .catch(() => {
-                    if (scanner) setTimeout(scan, 100);
+                    if (scanner) setTimeout(scan, 50);  // ← 50ms MÁS RÁPIDO
                 });
         };
         
