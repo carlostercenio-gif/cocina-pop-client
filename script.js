@@ -404,7 +404,7 @@ window.startScanner = function() {
                     }, 350);
                 })
                 .catch(() => {
-                    if (scanner) setTimeout(scan, 50);  // ← 50ms MÁS RÁPIDO
+                   if (scanner) requestAnimationFrame(scan);  // ← VELOCIDAD MÁXIMA
                 });
         };
         
