@@ -412,10 +412,18 @@ function agregarProductoEscaneado(producto, id, qrData) {
     let numeroLote = null;
     
     if (qrData) {
-        // ✅ SOPORTA AMBOS FORMATOS (compacto y normal)
-        vencimiento = qrData.v || qrData.vencimiento;
+        // ✅ Leer vencimiento (acepta formato con y sin guiones)
+        let fechaVenc = qrData.v || qrData.vencimiento;
+        
+        // Si viene sin guiones (20260227), convertir a formato estándar (2026-02-27)
+        if (fechaVenc && fechaVenc.length === 8 && !fechaVenc.includes('-')) {
+            fechaVenc = fechaVenc.substring(0, 4) + '-' + fechaVenc.substring(4, 6) + '-' + fechaVenc.substring(6, 8);
+        }
+        vencimiento = fechaVenc;
+        
         const loteIdx = qrData.l !== undefined ? qrData.l : qrData.loteIndex;
-        numeroLote = qrData.n || qrData.numeroLote || (loteIdx !== undefined ? 'Lote ' + (loteIdx + 1) : null);
+        // ✅ CAMBIO: Calcular numeroLote desde loteIdx (ya no viene 'n' en el QR)
+        numeroLote = (loteIdx !== undefined ? 'Lote ' + (loteIdx + 1) : null);
     }
     
     // Fallback: usar el lote más viejo (FIFO)
@@ -453,8 +461,8 @@ function agregarProductoEscaneado(producto, id, qrData) {
     
     saveData();
     
-    // Mostrar confirmación (✅ arreglé el error del alert)
-    alert(`✅ "${producto.nom}" agregado a ${producto.cat}`);
+    // Mostrar confirmación
+    alert('✅ "' + producto.nom + '" agregado a ' + producto.cat);
     
     // Actualizar vistas
     renderAll();
