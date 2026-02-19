@@ -360,19 +360,31 @@ window.startScanner = function() {
     readerDiv.innerHTML = '<video id="video" style="width:100%; height:500px; object-fit:cover; border-radius:15px; background:#000;"></video>';
     const video = document.getElementById('video');
     
-    navigator.mediaDevices.getUserMedia({ 
+   navigator.mediaDevices.getUserMedia({ 
         video: { 
             facingMode: 'environment',
-            width: { ideal: 1920, min: 1280 },
-            height: { ideal: 1080, min: 720 },
-            focusMode: 'continuous',
-            zoom: true
+            width: { ideal: 1280 },
+            height: { ideal: 720 }
         } 
-    }).then(stream => {
+    }).then(async stream => {
         video.srcObject = stream;
         video.setAttribute('playsinline', true);
-        video.play();
+        await video.play();
         scanner = stream;
+        
+        const track = stream.getVideoTracks()[0];
+        const capabilities = track.getCapabilities();
+        const advancedConstraints = {};
+        
+        if (capabilities.focusMode && capabilities.focusMode.includes('continuous')) {
+            advancedConstraints.focusMode = 'continuous';
+        }
+        if (capabilities.zoom) {
+            advancedConstraints.zoom = Math.min(2, capabilities.zoom.max); 
+        }
+        if (Object.keys(advancedConstraints).length > 0) {
+            track.applyConstraints({ advanced: [advancedConstraints] }).catch(e => console.error(e));
+        }
         
         const codeReader = new ZXing.BrowserQRCodeReader();
         
@@ -391,7 +403,6 @@ window.startScanner = function() {
                             
                             if (productId && catalogoProductos[productId]) {
                                 const producto = catalogoProductos[productId];
-                                // Pasar también la info del lote si existe
                                 agregarProductoEscaneado(producto, productId, qrData);
                             } else {
                                 console.error('Producto no encontrado en catálogo:', productId);
@@ -404,7 +415,7 @@ window.startScanner = function() {
                     }, 350);
                 })
                 .catch(() => {
-                   if (scanner) requestAnimationFrame(scan);  // ← VELOCIDAD MÁXIMA
+                   if (scanner) requestAnimationFrame(scan);
                 });
         };
         
